@@ -6,7 +6,16 @@ from pathlib import Path
 from modules.basic_operations import list_dirs,Item,ItemType
 
 class FileExplorerApp(App):
+    def __init__(self):
+        super().__init__()
+        self.current_path = Path.home()
+
     CSS_PATH =  "./main.css"
+
+    BINDINGS = [
+        ("a", "filter_all", "All Files"),
+        ("h", "filter_hidden", "Hidden Files"),
+    ]
 
     def compose(self) -> ComposeResult:
 
@@ -18,6 +27,7 @@ class FileExplorerApp(App):
                 classes="sidebar"
             ),
             Container(
+                ListView(id="files_list"),
                 classes="content",
                 id="content"
             ),
@@ -26,22 +36,82 @@ class FileExplorerApp(App):
 
         yield Footer()
 
+    
+
+    def update_items(self,item_list) -> None:
+        """
+        Update the file list view with new items.
+
+        This method clears the contents of the ListView identified by `#files_list`
+        and repopulates it using the provided `item_list`. Each item is displayed
+        with an emoji according to its type:
+        
+        - 📄 for files (`ItemType.FILE`)
+        - 📁 for directories (`ItemType.DIR`)
+        - ❓ for unknown or unsupported item types
+
+        After updating the list, focus is returned to the ListView so the user can
+        continue navigating with the keyboard.
+
+        Args:
+            item_list (list): A list of items returned by `list_dirs()`. Each item
+                must have at least a `.name` attribute and a `.type` attribute that
+                corresponds to one of the values in `ItemType`.
+
+        Returns:
+            None: This method updates the UI but does not return a value.
+        """
+        list_view = self.query_one("#files_list")
+        list_view.clear()                                                          #Clear the list view items
+
+        for item in item_list:
+            if item.type == ItemType.FILE:
+                list_view.append(ListItem(Label(f"📄{item.name}")))
+            elif item.type == ItemType.DIR:
+                list_view.append(ListItem(Label(f"📁{item.name}")))
+            else:
+                list_view.append(ListItem(Label(f"❓{item.name}")))
+        list_view.focus()                                                           #User start focus in the list view items to nav with arrows
+
+    #binding actions
+    def action_filter_all(self):
+        """
+        Show all items in the current directory.
+
+        This action retrieves every item inside the current path, regardless of
+        its type (files, directories, or hidden items), and updates the ListView
+        to display them. Intended to be triggered by a keybinding.
+        
+        Returns:
+            None: The UI is updated but no value is returned.
+        """
+        all_list = list_dirs(self.current_path)
+        self.update_items(all_list)
+
+    def action_filter_hidden(self):
+        """
+        Show only hidden items in the current directory.
+
+        This action retrieves only items classified as `ItemType.HIDDEN` inside
+        the current path and updates the ListView accordingly. Intended to be
+        triggered by a keybinding to quickly toggle visibility of hidden files.
+        
+        Returns:
+            None: The UI is updated but no value is returned.
+        """
+        hidden_list = list_dirs(self.current_path,ItemType.HIDDEN)
+        self.update_items(hidden_list)
+
     def on_mount(self) -> None: #This function fires each time that you run the app
         self.title = "File Explorer"
-        self.sub_title = "v0.1" #file explorer version
+        self.sub_title = "v0.2" #file explorer version
 
         
 
     def on_ready(self) -> None:
         #List items from home
-        home_items = list_dirs(Path.home())                                         #get items from "home" dir
-        list_view = ListView(id="files_list")
-        content_area = self.query_one("#content")
-        content_area.mount(list_view)                                               #mount the list_view before append items dinamically
-        for item in home_items:
-            if item.type == ItemType.FILE:
-                list_view.append(ListItem(Label(item.name)))
-        list_view.focus()                                                           #User start focus in the list view items to nav with arrows
+        home_items = list_dirs(self.current_path)                                         #get items from "home" dir
+        self.update_items(home_items)
 
 if __name__ == "__main__":
     app = FileExplorerApp()
