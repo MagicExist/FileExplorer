@@ -71,7 +71,7 @@ class FileExplorerApp(App):
 
     def on_ready(self) -> None:
         #List items from home
-        home_items = list_dirs(Path.home())                                         #get items from "home" dir
+        home_items = list_dirs(self.current_path)                                         #get items from "home" dir
         self.update_items(home_items)
 
 if __name__ == "__main__":
