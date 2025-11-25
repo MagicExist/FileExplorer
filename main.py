@@ -6,6 +6,10 @@ from pathlib import Path
 from modules.basic_operations import list_dirs,Item,ItemType
 
 class FileExplorerApp(App):
+    def __init__(self):
+        super().__init__()
+        self.current_path = Path.home()
+
     CSS_PATH =  "./main.css"
 
     def compose(self) -> ComposeResult:
