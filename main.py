@@ -86,6 +86,19 @@ class FileExplorerApp(App):
         all_list = list_dirs(self.current_path)
         self.update_items(all_list)
 
+    def action_filter_hidden(self):
+        """
+        Show only hidden items in the current directory.
+
+        This action retrieves only items classified as `ItemType.HIDDEN` inside
+        the current path and updates the ListView accordingly. Intended to be
+        triggered by a keybinding to quickly toggle visibility of hidden files.
+        
+        Returns:
+            None: The UI is updated but no value is returned.
+        """
+        hidden_list = list_dirs(self.current_path,ItemType.HIDDEN)
+        self.update_items(hidden_list)
 
     def on_mount(self) -> None: #This function fires each time that you run the app
         self.title = "File Explorer"
