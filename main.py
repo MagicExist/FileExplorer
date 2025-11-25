@@ -12,6 +12,11 @@ class FileExplorerApp(App):
 
     CSS_PATH =  "./main.css"
 
+    BINDINGS = [
+        ("a", "filter_all", "All Files"),
+        ("h", "filter_hidden", "Hidden Files"),
+    ]
+
     def compose(self) -> ComposeResult:
 
         yield Header()
