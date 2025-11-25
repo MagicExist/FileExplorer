@@ -24,7 +24,7 @@ filters = {
 
 
 
-def list_dirs(route='.',type=ItemType.ALL):
+def list_dirs(route='.',type=ItemType.ALL) -> list[Item]:
     """
     Return the items from a specific directory.
 
