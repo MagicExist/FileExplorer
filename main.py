@@ -36,6 +36,8 @@ class FileExplorerApp(App):
 
         yield Footer()
 
+    
+
     def update_items(self,item_list) -> None:
         """
         Update the file list view with new items.
@@ -102,7 +104,7 @@ class FileExplorerApp(App):
 
     def on_mount(self) -> None: #This function fires each time that you run the app
         self.title = "File Explorer"
-        self.sub_title = "v0.1" #file explorer version
+        self.sub_title = "v0.2" #file explorer version
 
         
 
