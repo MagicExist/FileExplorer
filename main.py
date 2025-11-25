@@ -71,6 +71,21 @@ class FileExplorerApp(App):
                 list_view.append(ListItem(Label(f"❓{item.name}")))
         list_view.focus()                                                           #User start focus in the list view items to nav with arrows
 
+    #binding actions
+    def action_filter_all(self):
+        """
+        Show all items in the current directory.
+
+        This action retrieves every item inside the current path, regardless of
+        its type (files, directories, or hidden items), and updates the ListView
+        to display them. Intended to be triggered by a keybinding.
+        
+        Returns:
+            None: The UI is updated but no value is returned.
+        """
+        all_list = list_dirs(self.current_path)
+        self.update_items(all_list)
+
 
     def on_mount(self) -> None: #This function fires each time that you run the app
         self.title = "File Explorer"
