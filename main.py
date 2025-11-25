@@ -33,25 +33,29 @@ class FileExplorerApp(App):
 
     def update_items(self,item_list) -> None:
         """
-            Update the file list view with new items.
+        Update the file list view with new items.
 
-            This method clears the current contents of the ListView identified by
-            `#files_list` and repopulates it with the items provided in `item_list`.
-            Only items whose type is `ItemType.FILE` are displayed. After updating,
-            the focus is set back to the ListView so the user can navigate using
-            the keyboard.
+        This method clears the contents of the ListView identified by `#files_list`
+        and repopulates it using the provided `item_list`. Each item is displayed
+        with an emoji according to its type:
+        
+        - 📄 for files (`ItemType.FILE`)
+        - 📁 for directories (`ItemType.DIR`)
+        - ❓ for unknown or unsupported item types
 
-            Args:
-                item_list (list): A list of items returned by `list_dirs()`. Each
-                    item must contain at least a `.name` attribute and a `.type`
-                    attribute compatible with `ItemType`.
+        After updating the list, focus is returned to the ListView so the user can
+        continue navigating with the keyboard.
 
-            Returns:
-                None: This method performs UI updates but does not return a value.
+        Args:
+            item_list (list): A list of items returned by `list_dirs()`. Each item
+                must have at least a `.name` attribute and a `.type` attribute that
+                corresponds to one of the values in `ItemType`.
+
+        Returns:
+            None: This method updates the UI but does not return a value.
         """
-
         list_view = self.query_one("#files_list")
-        list_view.clear()
+        list_view.clear()                                                          #Clear the list view items
 
         for item in item_list:
             if item.type == ItemType.FILE:
