@@ -18,6 +18,7 @@ class FileExplorerApp(App):
                 classes="sidebar"
             ),
             Container(
+                ListView(id="files_list"),
                 classes="content",
                 id="content"
             ),
@@ -25,6 +26,38 @@ class FileExplorerApp(App):
         )
 
         yield Footer()
+
+    def update_items(self,item_list) -> None:
+        """
+            Update the file list view with new items.
+
+            This method clears the current contents of the ListView identified by
+            `#files_list` and repopulates it with the items provided in `item_list`.
+            Only items whose type is `ItemType.FILE` are displayed. After updating,
+            the focus is set back to the ListView so the user can navigate using
+            the keyboard.
+
+            Args:
+                item_list (list): A list of items returned by `list_dirs()`. Each
+                    item must contain at least a `.name` attribute and a `.type`
+                    attribute compatible with `ItemType`.
+
+            Returns:
+                None: This method performs UI updates but does not return a value.
+        """
+
+        list_view = self.query_one("#files_list")
+        list_view.clear()
+
+        for item in item_list:
+            if item.type == ItemType.FILE:
+                list_view.append(ListItem(Label(f"📄{item.name}")))
+            elif item.type == ItemType.DIR:
+                list_view.append(ListItem(Label(f"📁{item.name}")))
+            else:
+                list_view.append(ListItem(Label(f"❓{item.name}")))
+        list_view.focus()                                                           #User start focus in the list view items to nav with arrows
+
 
     def on_mount(self) -> None: #This function fires each time that you run the app
         self.title = "File Explorer"
@@ -35,13 +68,7 @@ class FileExplorerApp(App):
     def on_ready(self) -> None:
         #List items from home
         home_items = list_dirs(Path.home())                                         #get items from "home" dir
-        list_view = ListView(id="files_list")
-        content_area = self.query_one("#content")
-        content_area.mount(list_view)                                               #mount the list_view before append items dinamically
-        for item in home_items:
-            if item.type == ItemType.FILE:
-                list_view.append(ListItem(Label(item.name)))
-        list_view.focus()                                                           #User start focus in the list view items to nav with arrows
+        self.update_items(home_items)
 
 if __name__ == "__main__":
     app = FileExplorerApp()
