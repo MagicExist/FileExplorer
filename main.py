@@ -4,6 +4,8 @@ from textual.containers import Container,Vertical,Horizontal
 from pathlib import Path
 #Modules
 from modules.basic_operations import list_dirs,Item,ItemType,list_common_dirs
+#Custom Classes
+from classes.DataListItem import DataListItem
 
 class FileExplorerApp(App):
     def __init__(self):
@@ -44,7 +46,7 @@ class FileExplorerApp(App):
 
         yield Footer()
 
-    def update_common_dirs(self,dir_list):
+    def update_common_dirs(self,dir_list:list[Item]):
          """
         Updates the common directories ListView with new directory items.
 
@@ -62,13 +64,14 @@ class FileExplorerApp(App):
 
          for dir in dir_list:
              list_view.append(
-                 ListItem(
-                     Label(f"📁{dir.name}")
+                 DataListItem(
+                     Label(f"📁{dir.name}"),
+                     data = dir
                  )
              )
 
 
-    def update_items(self,item_list) -> None:
+    def update_items(self,item_list:list[Item]) -> None:
         """
         Update the file list view with new items.
 
@@ -102,6 +105,38 @@ class FileExplorerApp(App):
             else:
                 list_view.append(ListItem(Label(f"❓{item.name}")))
         list_view.focus()                                                           #User start focus in the list view items to nav with arrows
+
+    #events
+    def on_list_view_selected(self, event) -> None:
+        """Handle selection of an item in the common directories ListView.
+
+        This event handler is triggered when the user selects a `ListItem`
+        (e.g., by pressing Enter) in the `#common_dirs_list` ListView.
+        If the selected item has an associated `Item` object stored in
+        its `data` attribute, the method retrieves its path, lists the
+        contents of that directory using `list_dirs`, and updates the
+        files ListView (`#files_list`) accordingly. Focus is then moved
+        to the files ListView, and `self.current_path` is updated.
+
+        Args:
+            event: The ListView selected event containing `event.item` and
+                `event.list_view`.
+
+        Returns:
+            None: Updates the UI but does not return a value.
+        """
+        if event.list_view.id == "common_dirs_list":
+            files_list = self.query_one("#files_list")
+            # Ensure event.item has data
+            if hasattr(event.item, "data") and event.item.data:
+                dir_path = event.item.data.path
+                try:
+                    new_items_list = list_dirs(dir_path)
+                    self.update_items(new_items_list)
+                except Exception as e:
+                    self.log(f"Error reading {dir_path}: {e}")
+                self.current_path = dir_path
+                files_list.focus()
 
     #binding actions
     def action_filter_all(self):
