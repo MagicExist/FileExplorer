@@ -3,7 +3,7 @@ from textual.widgets import Header, Footer, Static, ListView, ListItem, Label
 from textual.containers import Container,Vertical,Horizontal
 from pathlib import Path
 #Modules
-from modules.basic_operations import list_dirs,Item,ItemType
+from modules.basic_operations import list_dirs,Item,ItemType,list_common_dirs
 
 class FileExplorerApp(App):
     def __init__(self):
@@ -25,7 +25,13 @@ class FileExplorerApp(App):
     
         yield Horizontal(
             Container(
-                Static("SideBar",classes="title"),
+                Vertical(
+                    Container(
+                        Label("Common Dirs"),
+                        ListView(id="common_dirs_list"),
+                        classes="common_dirs_container"
+                    ),
+                ),
                 classes="sidebar"
             ),
             Container(
@@ -38,7 +44,29 @@ class FileExplorerApp(App):
 
         yield Footer()
 
-    
+    def update_common_dirs(self,dir_list):
+         """
+        Updates the common directories ListView with new directory items.
+
+        Clears the existing items in the ListView with ID `#common_dirs_list`
+        and appends new `ListItem` objects, each containing a `Label` that
+        displays the directory name prefixed with a folder emoji 📁.
+
+        Args:
+            dir_list (list[Item]): A list of `Item` objects representing
+                common directories to display in the sidebar.
+         """
+
+         list_view = self.query_one("#common_dirs_list")
+         list_view.clear()        
+
+         for dir in dir_list:
+             list_view.append(
+                 ListItem(
+                     Label(f"📁{dir.name}")
+                 )
+             )
+
 
     def update_items(self,item_list) -> None:
         """
@@ -140,14 +168,18 @@ class FileExplorerApp(App):
 
     def on_mount(self) -> None: #This function fires each time that you run the app
         self.title = "File Explorer"
-        self.sub_title = "v0.2" #file explorer version
+        self.sub_title = "v0.3" #file explorer version
 
         
 
     def on_ready(self) -> None:
         #List items from home
-        home_items = list_dirs(self.current_path)                                         #get items from "home" dir
+        home_items = list_dirs(self.current_path)                                      #get items from "home" dir
         self.update_items(home_items)
+
+        common_dirs = list_common_dirs()   
+        self.update_common_dirs(common_dirs)
+        
 
 if __name__ == "__main__":
     app = FileExplorerApp()
