@@ -1,12 +1,18 @@
 from pathlib import Path
 from enum import Enum,auto
 from dataclasses import dataclass
+from platformdirs import user_desktop_dir, user_documents_dir, user_downloads_dir
 
 class ItemType(Enum):
     ALL = auto()
     DIR = auto()
     FILE = auto()
     HIDDEN = auto()
+
+class CommonDirs(Enum):
+    DESKTOP = Path(user_desktop_dir())
+    DOCUMENTS = Path(user_documents_dir())
+    DOWNLOADS = Path(user_downloads_dir())
 
 @dataclass
 class Item:
@@ -60,3 +66,31 @@ def list_dirs(route='.',type=ItemType.ALL) -> list[Item]:
                     hidden=item.name.startswith('.')
                 ))
         return dir_items
+    
+def list_common_dirs() -> list[Item]:
+    """
+    Returns a list of common user directories as `Item` objects.
+
+    Iterates over the `CommonDirs` enum and creates an `Item` instance
+    for each directory, including its name, path, type, and hidden status.
+
+    Hidden status is determined by whether the directory name starts with a dot ('.').
+
+    Returns:
+        list[Item]: A list of `Item` objects representing common directories
+        such as Desktop, Documents, and Downloads.
+    """
+
+    items = []
+    for dir_enum in CommonDirs:
+        path = dir_enum.value
+        items.append(
+            Item(
+                name=path.name,
+                path=path,
+                type=ItemType.DIR,
+                hidden=path.name.startswith('.')
+            )
+        )
+    return items
+   
