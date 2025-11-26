@@ -15,6 +15,7 @@ class FileExplorerApp(App):
     BINDINGS = [
         ("a", "filter_all", "All Files"),
         ("h", "filter_hidden", "Hidden Files"),
+        ("d", "filter_dir", "Filter Dirs"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -101,6 +102,24 @@ class FileExplorerApp(App):
         """
         hidden_list = list_dirs(self.current_path,ItemType.HIDDEN)
         self.update_items(hidden_list)
+    
+    def action_filter_dir(self) -> None:
+        """
+        Filters and displays only directories in the current path.
+
+        Retrieves a list of items from `self.current_path` that are directories
+        and updates the UI or internal state to show only these directory items.
+
+        Args:
+            self: The instance of the class containing the current path and 
+                the `update_items` method.
+        Returns:
+            None: The UI is updated but no value is returned.
+        """
+
+        dir_list = list_dirs(self.current_path,ItemType.DIR)
+        self.update_items(dir_list)
+
 
     def on_mount(self) -> None: #This function fires each time that you run the app
         self.title = "File Explorer"
